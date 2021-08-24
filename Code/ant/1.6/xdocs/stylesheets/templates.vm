@@ -1,0 +1,321 @@
+#*
+ * ============================================================================
+ *                   The Apache Software License, Version 1.1
+ * ============================================================================
+ *
+ *    Copyright (C) 2000-2003 The Apache Software Foundation. All
+ *    rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modifica-
+ * tion, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of  source code must  retain the above copyright  notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if any, must
+ *    include  the following  acknowledgment:  "This product includes  software
+ *    developed  by the  Apache Software Foundation  (http://www.apache.org/)."
+ *    Alternately, this  acknowledgment may  appear in the software itself,  if
+ *    and wherever such third-party acknowledgments normally appear.
+ *
+ * 4. The names "Ant" and  "Apache Software Foundation"  must not be used to
+ *    endorse  or promote  products derived  from this  software without  prior
+ *    written permission. For written permission, please contact
+ *    apache@apache.org.
+ *
+ * 5. Products  derived from this software may not  be called "Apache", nor may
+ *    "Apache" appear  in their name,  without prior written permission  of the
+ *    Apache Software Foundation.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS  FOR A PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN NO  EVENT SHALL  THE
+ * APACHE SOFTWARE  FOUNDATION  OR ITS CONTRIBUTORS  BE LIABLE FOR  ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL,  EXEMPLARY, OR CONSEQUENTIAL  DAMAGES (INCLU-
+ * DING, BUT NOT LIMITED TO, PROCUREMENT  OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR  PROFITS; OR BUSINESS  INTERRUPTION)  HOWEVER CAUSED AND ON
+ * ANY  THEORY OF LIABILITY,  WHETHER  IN CONTRACT,  STRICT LIABILITY,  OR TORT
+ * (INCLUDING  NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT OF THE  USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software  consists of voluntary contributions made  by many individuals
+ * on behalf of the  Apache Software Foundation.  For more  information  on the
+ * Apache Software Foundation, please see <http://www.apache.org/>.
+ *
+ *#
+
+## This is where the common macro's live
+
+#macro ( table $table)
+  #if ($table.getAttributeValue("class"))
+    #set ($class = $table.getAttributeValue("class"))
+  #else
+    #set ($class = "ForrestTable")
+  #end
+  <table class="$!class" cellspacing="1" cellpadding="4">
+  #foreach ( $items in $table.getChildren() )
+    #if ($items.getName().equals("tr"))
+      #tr ($items)
+    #end
+  #end
+  </table>
+#end
+
+#macro ( tr $tr)
+  <tr>
+  #foreach ( $items in $tr.getChildren() )
+    #if ($items.getName().equals("td"))
+      #td ($items)
+    #elseif ($items.getName().equals("th"))
+      #th ($items)
+    #end
+  #end
+</tr>
+#end
+
+#macro ( td $value)
+  #if ($value.getAttributeValue("colspan"))
+    #set ($colspan = $value.getAttributeValue("colspan"))
+  #else
+    #set ($colspan = 1)
+  #end
+  #if ($value.getAttributeValue("rowspan"))
+    #set ($rowspan = $value.getAttributeValue("rowspan"))
+  #else
+    #set ($rowspan = 1)
+  #end
+  <td colspan="$!colspan" rowspan="$!rowspan"
+      valign="top" align="left">
+    #if ($value.getText().length() != 0 || $value.hasChildren())
+      $xmlout.outputString($value, true)
+    #else
+      &nbsp;
+    #end
+  </td>
+#end
+
+#macro ( th $value)
+  #if ($value.getAttributeValue("colspan"))
+    #set ($colspan = $value.getAttributeValue("colspan"))
+  #else
+    #set ($colspan = 1)
+  #end
+  #if ($value.getAttributeValue("rowspan"))
+    #set ($rowspan = $value.getAttributeValue("rowspan"))
+  #else
+    #set ($rowspan = 1)
+  #end
+  <th colspan="$!colspan" rowspan="$!rowspan"
+      valign="top" align="left">
+    #if ($value.getText().length() != 0 || $value.hasChildren())
+      $xmlout.outputString($value, true)
+    #else
+      &nbsp;
+    #end
+  </th>
+#end
+
+#macro ( projectanchor $name $value )
+  #if ($value.startsWith("http://"))
+    <a href="$value">$name</a>
+  #elseif ($value.startsWith("/site"))
+    <a href="http://jakarta.apache.org$value">$name</a>
+  #else
+    <a href="$relativePath$value">$name</a>
+  #end
+#end
+
+#macro ( metaauthor $author $email )
+  <meta name="author" content="$author">
+  <meta name="email" content="$email">
+#end
+
+#macro ( image $value )
+  #if ($value.getAttributeValue("width"))
+    #set ($width=$value.getAttributeValue("width"))
+  #end
+  #if ($value.getAttributeValue("height"))
+    #set ($height=$value.getAttributeValue("height"))
+  #end
+  #if ($value.getAttributeValue("align"))
+    #set ($align=$value.getAttributeValue("align"))
+  #end
+  #if ($value.getAttributeValue("alt"))
+    #set ($align=$value.getAttributeValue("alt"))
+  #end
+  <img src="$relativePath$value.getAttributeValue("src")"
+       width="$!width" height="$!height" align="$!align" alt="$!alt">
+#end
+
+#macro ( source $value)
+<pre class="code">$escape.getText($value.getText())</pre>
+#end
+
+#macro ( makeTabs )
+            <div class="tab">
+              <table summary="tab bar" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+  #set ( $tabs = $project.getChild("body").getChildren("menusection"))
+  #if ( $project.getChild("body").getChild("menusection") )
+    #foreach ( $tab in $tabs )
+      #set ($currentIndex = $root.getChild("properties").getChild("index").getAttributeValue("value") )
+      #set ($index = $tab.getAttributeValue("index"))
+      #set ($name = $tab.getAttributeValue("name"))
+      #set ($link = $tab.getAttributeValue("href"))
+      #if ( ($currentIndex && $currentIndex.trim().equals( $index )) || ((!$currentIndex) && $velocityCount == 1) )
+                    <td width="8"><img alt="" height="5" width="8" src="$relativePath/images/spacer.gif"></td><td valign="bottom">
+                      <table summary="selected tab" style="height: 1.5em" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                        <td valign="top" width="5" bgcolor="$blue2"><img height="5" width="5" alt="" src="$relativePath/images/tabSel-left.gif"></td><td valign="middle" bgcolor="$blue2"><font color="$lightfg" size="2" face="Arial, Helvetica, Sans-serif"><b>$name</b></font></td><td valign="top" width="5" bgcolor="$blue2"><img height="5" width="5" alt="" src="$relativePath/images/tabSel-right.gif"></td>
+                        </tr>
+                      </table>
+                    </td>
+      #else
+                    <td width="5"><img alt="" height="8" width="8" src="$relativePath/images/spacer.gif"></td><td valign="bottom">
+                      <table summary="non selected tab" style="height: 1.4em" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td valign="top" width="5" bgcolor="$blue4"><img height="5" width="5" alt="" src="$relativePath/images/tab-left.gif"></td><td valign="middle" bgcolor="$blue4"><a href="$relativePath$link"><font size="2" face="Arial, Helvetica, Sans-serif">$name</font></a></td><td valign="top" width="5" bgcolor="$blue4"><img height="5" width="5" alt="" src="$relativePath/images/tab-right.gif"></td>
+                        </tr>
+                      </table>
+                    </td>
+      #end
+    #end
+  #else
+                    <td width="8"><img alt="" height="5" width="8" src="$relativePath/images/spacer.gif"></td><td valign="bottom">
+                      <table summary="selected tab" style="height: 1.5em" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                        <td valign="top" width="5" bgcolor="$blue2"><img height="5" width="5" alt="" src="$relativePath/images/tabSel-left.gif"></td><td valign="middle" bgcolor="$blue2"><font color="$lightfg" size="2" face="Arial, Helvetica, Sans-serif"><b>Home</b></font></td><td valign="top" width="5" bgcolor="$blue2"><img height="5" width="5" alt="" src="$relativePath/images/tabSel-right.gif"></td>
+                        </tr>
+                      </table>
+                    </td>
+  #end
+                </tr>
+              </table>
+            </div>
+#end
+
+
+#macro ( makeMainNavigation )
+  #set ( $tabs = $project.getChild("body").getChildren("menusection"))
+  #if ( $project.getChild("body").getChild("menusection") )
+    #set ( $currentIndex = $root.getChild("properties").getChild("index").getAttributeValue("value") )
+    #if ( $currentIndex )
+      #foreach ( $tab in $tabs )
+        #set ($index = $tab.getAttributeValue("index"))
+        #if ( $currentIndex.trim().equals( $index ) )
+          #set ($menus = $tab.getChildren("menu"))
+        #end
+      #end
+    #else
+      #set ($menus = $project.getChild("body").getChild("menusection").getChildren("menu"))
+    #end
+  #else
+    #set ($menus = $project.getChild("body").getChildren("menu"))
+  #end
+  #makeProject ( $menus )
+#end
+
+#macro (makeProject $menus)
+
+  <div class="menucontainer">
+    <div class="menu">
+      <ul>
+      #foreach ( $menu in $menus )
+        <li class="menuheader">$menu.getAttributeValue("name")
+          <ul>
+            #foreach ( $item in $menu.getChildren() )
+              #set ($name = $item.getAttributeValue("name"))
+              #set ($current = $root.getChild("properties").getChild("title").getText() )
+                <li>
+              #if ( $current.trim().equals( $name ) )
+                <span class="sel">$name</span>
+              #else
+                #projectanchor($name $item.getAttributeValue("href"))
+              #end
+                </li>
+            #end
+          </ul>
+        </li>
+      #end
+      </ul>
+    </div>
+    <img style="float: left" height="10" width="10" border="0" alt="" src="$relativePath/images/menu-left.gif">
+    <img style="float: right" height="10" width="10" border="0" alt="" src="$relativePath/images/menu-right.gif">
+  </div>  
+#end
+
+#macro (header)
+  <html lang="en">
+    <!-- GENERATED FILE, DO NOT EDIT, EDIT THE XML FILE IN xdocs INSTEAD! -->
+    <head>
+      <META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <title>$project.getChild("title").getText() - $root.getChild("properties").getChild("title").getText()</title>
+        <link type="text/css" href="$relativePath/page.css" rel="stylesheet">
+  #set ($authors = $root.getChild("properties").getChildren("author"))
+  #foreach ( $au in $authors )
+    #metaauthor ( $au.getText() $au.getAttributeValue("email") )
+  #end
+    </head>
+
+    <body>
+      <p class="navpath">
+        <script src="$relativePath/breadcrumbs.js" language="JavaScript" type="text/javascript"></script>
+      </p>
+
+      <div class="logobar">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="left"><img border="0" alt="Apache Ant site" src="$relativePath/images/group-logo.gif"></td>
+            <td align="center" width="100%"><img alt="Apache Ant logo" border="0" src="$relativePath/images/project-logo.gif"></td>
+            <td align="right">
+              <form target="_blank" onsubmit="q.value = query.value + ' site:ant.apache.org'" action="http://www.google.com/search" method="get">
+                <table summary="search" border="0" cellspacing="0" cellpadding="0" bgcolor="$blue2">
+                  <tr>
+                    <td colspan="3"><img height="10" width="1" alt="" src="$relativePath/images/spacer.gif"></td>
+                  </tr>
+                  <tr>
+                    <td><img height="1" width="1" alt="" src="$relativePath/images/spacer.gif"></td>
+                    <td nowrap="nowrap" class="searchcaption">
+                      <input name="q" type="hidden">
+                      <input size="15" id="query" type="text">
+                      <img height="1" width="5" alt="" src="$relativePath/images/spacer.gif">
+                      <input name="Search" value="Search" type="submit">
+                      <br>
+                      the Apache Ant site
+                    </td>
+                    <td><img height="1" width="1" alt="" src="$relativePath/images/spacer.gif"></td>
+                  </tr>
+                  <tr>
+                    <td><img alt="" border="0" height="10" width="9" src="$relativePath/images/search-left.gif"></td>
+                    <td><img height="1" width="1" alt="" src="$relativePath/images/spacer.gif"></td>
+                    <td><img alt="" border="0" height="10" width="9" src="$relativePath/images/search-right.gif"></td>
+                  </tr>
+                </table>
+              </form>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      #makeTabs()
+
+      <div class="bluebar"></div>
+      #makeMainNavigation()
+      <div class="lightbluebar">&nbsp;</div>
+#end
+
+#macro (footer)
+      <p class="copyright">
+        Copyright &copy; 2000-2003&nbsp;The Apache Software Foundation. All rights reserved.
+        <script type="text/javascript" language="JavaScript"><!--
+                document.write(" - "+"Last Published: " + document.lastModified);
+              //  -->
+        </script>
+      </p>
+    </body>
+  </html>
+#end

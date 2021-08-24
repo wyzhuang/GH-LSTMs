@@ -122,9 +122,7 @@ for i in range(10):
                 merge = keras.layers.concatenate([sce_gated_res, promise_gated_res])
                 main_output = Dense(1, activation='sigmoid', name='main_output')(merge)
                 model = Model(inputs=[sce_input, promise_input], outputs=[main_output])
-                early_stop = EarlyStopping(monitor='val_my_f1', patience=15, restore_best_weights=True, mode='max')
-                check_point = ModelCheckpoint('./saved_models/{}.model'.format(task_name),
-                                              monitor='val_my_f1', save_best_only=True)
+
                 model.compile(loss=my_loss, optimizer='adam', metrics=['accuracy', my_f1])
 
                 val_data = ({'sce_input': test_X_sce,
@@ -136,12 +134,13 @@ for i in range(10):
                           batch_size=2048,
                           epochs=200,
                           class_weight=weight,
-                          validation_data=val_data,
-                          callbacks=[early_stop, check_point])
+                          validation_data=val_data)
 
-                predict_y = np.round(model.predict(x={'sce_input': test_X_sce, 'promise_input': test_X_promise}))
+                predict_y = model.predict(x={'sce_input': test_X_sce, 'promise_input': test_X_promise})
+                np.save("./res/{}.npy".format(task_name),predict_y)
+                predict_y=np.round(predict_y)
 
-                with open('./res.txt', 'a+', encoding='utf-8') as f:
+                with open('./res/res.txt', 'a+', encoding='utf-8') as f:
                     f.write('{}\n'.format(task_name))
                     f.writelines(classification_report(y_true=test_Y_promise, y_pred=predict_y))
                     f.write('P: {}\n'.format(precision_score(y_true=test_Y_promise, y_pred=predict_y)))

@@ -1,0 +1,10 @@
+<project name="test" default="test" basedir=".">
+
+  <target name="test">
+    <xmlproperty file="xmlproperty_data.xml"/>
+  </target>
+
+  <target name="testdtd">
+    <xmlproperty file="xmlproperty_withdtd.xml"/>
+  </target>
+</project>

@@ -1,0 +1,10 @@
+.ant.properties
+dist
+build
+bootstrap
+distribution
+*.el
+*.ipr
+*.pif
+velocity.log
+
