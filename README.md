@@ -1,7 +1,7 @@
 # GH-LSTMs
 Software defect prediction based on gated hierarchical LSTMs
 
-简单讲一下各个代码文件作用和运行步骤（以下仅以"ant"项目为例，其他项目虽然代码中有，但是项目本身我没放上来）
+简单讲一下各个代码文件作用和运行步骤（以下仅以"ant"项目为例，其他项目的promise数据集也已经打包上传）
 
 1.首先通过“parse_ast.py”提取对应项目版本的AST序列，生成两部分，一部分是"corpus"文件夹下的语料库，另一部分是“sequence_and_label”文件夹下的AST序列-标签对，以方便后续进一步处理。
 
